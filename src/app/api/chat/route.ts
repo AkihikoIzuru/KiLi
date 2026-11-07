@@ -173,16 +173,16 @@ export async function POST(req: Request) {
         "Connection": "keep-alive",
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("❌ Chat API error:", error);
     console.error("Error details:", {
-      message: error.message,
-      stack: error.stack,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
     });
     return new Response(
       JSON.stringify({
         error: "Failed to process chat request",
-        details: error.message
+        details: error instanceof Error ? error.message : String(error)
       }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );

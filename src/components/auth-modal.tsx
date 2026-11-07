@@ -64,8 +64,8 @@ export function AuthModal({ onClose }: AuthModalProps) {
         // Success - reload page to get session
         window.location.reload();
       }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }

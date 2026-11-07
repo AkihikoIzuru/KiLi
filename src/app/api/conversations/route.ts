@@ -55,7 +55,7 @@ export async function GET() {
       });
 
       return acc;
-    }, {} as Record<string, any[]>);
+    }, {} as Record<string, Array<{ id: string; title: string; group: string; messageCount: number; updatedAt: Date }>>);
 
     return NextResponse.json(grouped);
   } catch (error) {

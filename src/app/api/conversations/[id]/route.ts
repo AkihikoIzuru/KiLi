@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 // GET /api/conversations/:id - Get conversation with messages
 export async function GET(req: Request, { params }: Params) {
@@ -13,9 +13,11 @@ export async function GET(req: Request, { params }: Params) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const conversation = await prisma.conversation.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id, // Ensure user owns this conversation
       },
       include: {
@@ -51,6 +53,7 @@ export async function PATCH(req: Request, { params }: Params) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const { title } = await req.json();
 
     if (!title || typeof title !== "string") {
@@ -63,7 +66,7 @@ export async function PATCH(req: Request, { params }: Params) {
     // Verify ownership
     const existing = await prisma.conversation.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
     });
@@ -76,7 +79,7 @@ export async function PATCH(req: Request, { params }: Params) {
     }
 
     const conversation = await prisma.conversation.update({
-      where: { id: params.id },
+      where: { id },
       data: { title: title.slice(0, 100) },
     });
 
@@ -99,10 +102,12 @@ export async function DELETE(req: Request, { params }: Params) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Verify ownership
     const existing = await prisma.conversation.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
     });
@@ -116,7 +121,7 @@ export async function DELETE(req: Request, { params }: Params) {
 
     // Delete conversation (messages cascade delete automatically)
     await prisma.conversation.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

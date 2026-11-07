@@ -70,7 +70,7 @@ export default function Home() {
       })
       .then((data) => {
         if (data.data && Array.isArray(data.data)) {
-          const fetchedModels = data.data.map((m: any) => {
+          const fetchedModels = data.data.map((m: { id: string; object: string; created: number; owned_by: string }) => {
             const parts = m.id.split("/");
             const lastName = parts[parts.length - 1];
 
@@ -91,7 +91,7 @@ export default function Home() {
             };
           });
 
-          console.log(`✅ Loaded ${fetchedModels.length} models from 9Router:`, fetchedModels.map(m => m.id));
+          console.log(`✅ Loaded ${fetchedModels.length} models from 9Router:`, fetchedModels.map((m: { id: string }) => m.id));
           setModels(fetchedModels);
 
           if (fetchedModels.length > 0) {
@@ -154,7 +154,7 @@ export default function Home() {
       if (!res.ok) throw new Error("Failed to load conversation");
 
       const data = await res.json();
-      const loadedMessages = data.messages.map((m: any) => ({
+      const loadedMessages = data.messages.map((m: { id: string; role: string; content: string; model?: string; createdAt: string }) => ({
         id: m.id,
         role: m.role,
         content: m.content,
@@ -281,8 +281,8 @@ export default function Home() {
 
       // Reload conversations to update timestamp
       loadConversations();
-    } catch (err: any) {
-      if (err.name !== "AbortError") {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name !== "AbortError") {
         setError(err);
         console.error("Chat error:", err);
       }
